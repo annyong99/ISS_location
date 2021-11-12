@@ -1,0 +1,39 @@
+<script>
+  function actionResult(values) {
+    $('.location_table').html(null);
+    const data = JSON.parse(values);
+    for (let i = 0; i < data.length; i += 1) {
+      const row = document.createElement('tr');
+      const date = row.insertCell(0);
+      date.textContent = new Date(data[i].timestamp * 1000);
+      const latitude = row.insertCell(1);
+      latitude.textContent = data[i].latitude;
+      const longitude = row.insertCell(2);
+      longitude.textContent = data[i].longitude;
+      const weather = row.insertCell(3);
+      weather.textContent = data[i].weather;
+      $('.location_table').append(row);
+    }
+  }
+
+  $(document).ready(() => {
+    $('form').submit((event) => {
+      event.preventDefault();
+      console.log($('#date').val());
+      let date = new Date($('#date').val()).getTime();
+      if (date > Date.now()) {
+        console.log('Must be past date'); // error handling for not past date
+        return;
+      }
+      date = Math.floor(date / 1000) - (60 * 60); 
+      let timestamps = [];
+      const minutesOffset = 600; // representing 10 minutes
+      for (let i = 0; i < 13; i += 1) {
+        if (date > (Date.now() / 1000)) break;
+        timestamps.push(date);
+        date += minutesOffset;
+      }
+      google.script.run.withSuccessHandler(actionResult).getIssLocation(timestamps);
+    });
+  });
+</script>
